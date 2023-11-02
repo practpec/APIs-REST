@@ -1,15 +1,15 @@
 const pool = require ('../configs/db.config')
 const index = async(req, res)=>{
     const query =' SELECT * FROM detallepedido'
-    pool.execute(query).then(([results])=>{res.json(results);})
-    .catch((error) => {
+    pool.execute(query).then(([results])=>{res.json(results);})//si funciona
+    .catch((error) => {//no funciona
         console.error('Error en la consulta:', error);
         res.status(500).send('Error en el servidor');
       });
 };
 const getById = async (req, res) => {
     const idPedido = req.params.id;
-    const query = 'SELECT * FROM detallepedido WHERE idPedido = ?  ';
+    const query = 'SELECT * FROM detallepedido WHERE idPedido = ? ';
     pool.execute(query, [idPedido])
     .then(([results]) => {
       res.json(results);
@@ -90,6 +90,7 @@ const updateCompleto = async (req, res) => {
 const updateParcial = async (req, res) => {
   const idDetalle = req.params.id;
   const cambios = req.body; 
+  const updateAt=new Date();
   if (Object.keys(cambios).length === 0) {
     return res.status(400).json({ mensaje: 'Se requieren datos para la actualización parcial' });
   }
@@ -97,8 +98,8 @@ const updateParcial = async (req, res) => {
   const dondeModificar = Object.keys(cambios).map((campo) => `${campo} = ?`).join(', ');
   const valores = Object.values(cambios);
 
-  const query = `UPDATE detallepedido SET ${dondeModificar} WHERE idDetalle = ?`;
-  pool.execute(query, [...valores, idDetalle])
+  const query = `UPDATE detallepedido SET ${dondeModificar},updateAt=? WHERE idDetalle = ?`;
+  pool.execute(query, [...valores, updateAt, idDetalle])
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.status(404).json({ mensaje: 'No se encontró el detalle' });
