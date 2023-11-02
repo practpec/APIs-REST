@@ -1,2 +1,4 @@
 MySQL/node_modules/
 MySQL/.env
+MongoDB/node_modules/
+MongoDB/.env
