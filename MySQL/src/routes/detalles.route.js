@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const detallesController = require('../controllers/detalles.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
-router.get('/', detallesController.index);
+router.get('/',authMiddleware.verificarJWT, detallesController.index);
 router.get('/:id', detallesController.getById);
 router.post('/', detallesController.create);
 router.delete('/:id', detallesController.deleteFisico);

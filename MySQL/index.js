@@ -10,9 +10,12 @@ app.use(bodyParser.json());
 
 
 const detallesRouter = require('./src/routes/detalles.route');
+const usuariosRouter = require('./src/routes/usuarios.route');
+const authRouter = require('./src/routes/auth.route');
 require('./src/configs/db.config');
 app.use('/detalles', detallesRouter);
-
+app.use('/usuarios', usuariosRouter);
+app.use('/auth', authRouter); 
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {

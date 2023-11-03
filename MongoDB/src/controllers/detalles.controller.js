@@ -5,16 +5,36 @@ const collectionName = process.env.MONGO_COLLECTION;
 
 const index = async (req, res) => {
   try {
-    const client = await MongoClient.connect(url);
-    const db = client.db(dbName);
-    const data = await db.collection(collectionName).find({}).toArray();
-    client.close();
-    res.json(data);
+      const client = await MongoClient.connect(url);
+      const db = client.db(dbName);
+      const collection = db.collection(collectionName);
+
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const skip = (page - 1) * limit; 
+
+      const data = await collection.find({}).skip(skip).limit(limit).toArray();
+      const totalDocuments = await collection.countDocuments({});
+      const totalPages = Math.ceil(totalDocuments / limit);
+      
+      client.close();
+
+      const response = {
+          message: "Se obtuvieron correctamente los datos",
+          page,
+          limit,
+          totalPages,
+          totalDocuments,
+          data
+      };
+
+      res.json(response);
   } catch (error) {
-    console.error('Error al obtener los datos:', error);
-    res.status(500).json({ error: 'Error al obtener los datos' });
+      console.error('Error al obtener los datos:', error);
+      res.status(500).json({ error: 'Error al obtener los datos' });
   }
 };
+
 const getById = async (req, res) => {
   try {
     const client = await MongoClient.connect(url);

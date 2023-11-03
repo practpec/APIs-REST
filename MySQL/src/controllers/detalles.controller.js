@@ -1,12 +1,37 @@
 const pool = require ('../configs/db.config')
-const index = async(req, res)=>{
-    const query =' SELECT * FROM detallepedido'
-    pool.execute(query).then(([results])=>{res.json(results);})//si funciona
-    .catch((error) => {//no funciona
-        console.error('Error en la consulta:', error);
-        res.status(500).send('Error en el servidor');
-      });
+const index = async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const offset = (page - 1) * limit;
+      const sql = `SELECT * FROM detallepedido LIMIT ${limit} OFFSET ${offset}`;
+
+      const [rows] = await pool.execute(sql);
+      const [countResult] = await pool.execute('SELECT COUNT(*) AS total FROM detallepedido');
+      const totalDocuments = countResult[0].total;
+
+      const totalPages = Math.ceil(totalDocuments / limit);
+
+      const response = {
+          message: "Se obtuvieron correctamente los datos",
+          page,
+          limit,
+          totalPages,
+          totalDocuments,
+          data: rows
+      };
+
+      res.json(response);
+  } catch (error) {
+      console.error('Error al obtener los datos:', error);
+      res.status(500).json({ error: 'Error al obtener los datos' });
+  }
 };
+
+module.exports = {
+  index
+};
+
 const getById = async (req, res) => {
     const idPedido = req.params.id;
     const query = 'SELECT * FROM detallepedido WHERE idPedido = ? ';
